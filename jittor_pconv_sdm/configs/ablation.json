@@ -1,0 +1,19 @@
+{
+  "mshnet_sls": {
+    "use_pconv": false,
+    "loss_type": "sls"
+  },
+  "mshnet_pconv_sls": {
+    "use_pconv": true,
+    "loss_type": "sls"
+  },
+  "mshnet_sdm": {
+    "use_pconv": false,
+    "loss_type": "sdm"
+  },
+  "mshnet_pconv_sdm": {
+    "use_pconv": true,
+    "loss_type": "sdm"
+  }
+}
+

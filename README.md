@@ -1,8 +1,8 @@
-# PConv-SDM-Jittor：红外弱小目标检测复现
+﻿# PConv-SDM-Jittor：红外弱小目标检测复现
 
 本仓库用于复现论文 **Pinwheel-shaped Convolution and Scale-based Dynamic Loss for Infrared Small Target Detection** 中面向 mask-based segmentation 的核心方法，并将 PyTorch 组合版迁移到 Jittor。
 
-当前仓库已完成第一阶段：官方 PyTorch 参考代码已整理，`MSHNet + PConv + SDM` 的 PyTorch 组合版已在本地 CPU 和云端 RTX 3090 环境通过轻量验证。下一步将开始 Jittor 迁移。
+当前仓库已完成 PyTorch baseline：官方 PyTorch 参考代码已整理，`MSHNet + PConv + SDM` 的 PyTorch 组合版已在本地 CPU、云端 RTX 3090 smoke，以及官方 IRSTD-1K 50 epoch 训练/测试上跑通。Jittor 迁移初版代码已补齐，并已在云端完成随机数据轻量验证和官方 IRSTD-1K 2 epoch debug。下一步是整理 Jittor 迁移提交，并准备 Jittor 50 epoch 对齐实验。
 
 ## 项目目标
 
@@ -70,9 +70,11 @@ PConv-SDM-Jittor/
 2. 整理 `MSHNet + PConv + SDM` 的 PyTorch 组合版。
 3. 在本地完成 `py_compile`、shape check、loss forward 等轻量检查。
 4. 在云端 GPU 上完成 PyTorch 轻量 smoke test。
-5. 开始 Jittor 迁移，并对齐模型结构、PConv padding、loss 计算和训练入口。
+5. 完成 Jittor 迁移初版，并对齐模型结构、PConv padding、loss 计算和训练入口。
 6. 在云端 GPU 上完成 Jittor 轻量 smoke test。
-7. 运行 IRSTD-1K 四组正式消融，并整理 IoU、Pd、Fa 与可视化结果。
+7. 在官方 IRSTD-1K 上完成 Jittor 2 epoch debug。
+8. 运行 Jittor 50 epoch 对齐实验。
+9. 运行 IRSTD-1K 四组正式消融，并整理 IoU、Pd、Fa 与可视化结果。
 
 ## PyTorch 轻量检查
 
@@ -143,6 +145,44 @@ logs/
 outputs/
 ```
 
+## PyTorch 基准结果
+
+官方 IRSTD-1K 上的 PyTorch 主配置 `mshnet_pconv_sdm` 已完成 50 epoch baseline：
+
+```text
+run dir: runs/pytorch_pconv_sdm_50epoch/mshnet_pconv_sdm-20260802-142726
+best epoch: 45
+IoU: 0.597179
+Pd: 0.911565
+Fa: 0.00001693
+```
+
+云端日志已归档到：
+
+```text
+/root/autodl-tmp/PConv-SDM-Jittor/logs/2026-08-02_05_pytorch_irstd1k_50epoch_baseline/
+```
+
+## Jittor debug 结果
+
+官方 IRSTD-1K 上的 Jittor 主配置 `mshnet_pconv_sdm` 已完成 2 epoch debug：
+
+```text
+run dir: runs/jittor_pconv_sdm_debug/mshnet_pconv_sdm-20260802-154228
+train.exit: 0
+test.exit: 0
+epoch=1 loss=0.871432
+IoU: 0.141926
+Pd: 0.527211
+Fa: 0.00052153
+```
+
+云端日志已归档到：
+
+```text
+/root/autodl-tmp/PConv-SDM-Jittor/logs/2026-08-02_07_jittor_irstd1k_debug/
+```
+
 ## 当前状态
 
 - [x] 建立正式仓库目录
@@ -150,6 +190,9 @@ outputs/
 - [x] 引入 MSHNet 参考代码
 - [x] 完成 PyTorch 组合版
 - [x] 完成 PyTorch 轻量验证
-- [ ] 完成 Jittor 迁移
-- [ ] 完成 Jittor 轻量验证
+- [x] 完成 PyTorch 50 epoch baseline
+- [x] 完成 Jittor 迁移初版代码
+- [x] 完成 Jittor 轻量验证
+- [x] 完成 Jittor 真实数据 2 epoch debug
+- [ ] 完成 Jittor 50 epoch 对齐实验
 - [ ] 完成四组正式消融实验
