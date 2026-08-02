@@ -74,6 +74,36 @@ PConv-SDM-Jittor/
 6. 在云端 GPU 上完成 Jittor 轻量 smoke test。
 7. 运行 IRSTD-1K 四组正式消融，并整理 IoU、Pd、Fa 与可视化结果。
 
+## PyTorch 轻量检查
+
+当前 PyTorch 组合版已提供以下检查入口：
+
+```bash
+python pytorch_pconv_sdm/tools/check_env.py
+python -m py_compile pytorch_pconv_sdm/train.py pytorch_pconv_sdm/test.py
+python pytorch_pconv_sdm/tools/sanity_check.py
+python pytorch_pconv_sdm/tools/smoke_train.py --max-iters 2 --config mshnet_pconv_sdm
+```
+
+训练入口示例：
+
+```bash
+python pytorch_pconv_sdm/train.py \
+  --dataset-dir /path/to/IRSTD-1k \
+  --config mshnet_pconv_sdm \
+  --batch-size 4 \
+  --epochs 400
+```
+
+测试入口示例：
+
+```bash
+python pytorch_pconv_sdm/test.py \
+  --dataset-dir /path/to/IRSTD-1k \
+  --weight-path /path/to/best_weight.pkl \
+  --config mshnet_pconv_sdm
+```
+
 ## 环境说明
 
 推荐基础环境：
@@ -107,7 +137,7 @@ outputs/
 - [x] 建立正式仓库目录
 - [x] 引入 PConv / SD Loss 参考代码
 - [x] 引入 MSHNet 参考代码
-- [ ] 完成 PyTorch 组合版
+- [x] 完成 PyTorch 组合版
 - [ ] 完成 PyTorch 轻量验证
 - [ ] 完成 Jittor 迁移
 - [ ] 完成 Jittor 轻量验证
