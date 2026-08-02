@@ -23,4 +23,4 @@ python pytorch_pconv_sdm/tools/smoke_train.py --max-iters 2 --config mshnet_pcon
 
 ## 下一步
 
-PyTorch 组合版在本地通过轻量检查后，需要在云端 GPU 环境中完成同一组 smoke test。通过后再开始 Jittor 迁移。
+PyTorch 组合版已在本地 CPU 和 AutoDL RTX 3090 环境中通过轻量检查。下一步开始 Jittor 迁移，并以当前 PyTorch 组合版作为结构、shape、loss 与训练入口的对齐基准。

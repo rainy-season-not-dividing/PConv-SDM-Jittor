@@ -2,7 +2,7 @@
 
 本仓库用于复现论文 **Pinwheel-shaped Convolution and Scale-based Dynamic Loss for Infrared Small Target Detection** 中面向 mask-based segmentation 的核心方法，并将 PyTorch 组合版迁移到 Jittor。
 
-当前仓库处于第一阶段：先整理官方 PyTorch 参考代码，再完成 `MSHNet + PConv + SDM` 的 PyTorch 可运行基线。Jittor 迁移将在 PyTorch 版本通过轻量验证后开始。
+当前仓库已完成第一阶段：官方 PyTorch 参考代码已整理，`MSHNet + PConv + SDM` 的 PyTorch 组合版已在本地 CPU 和云端 RTX 3090 环境通过轻量验证。下一步将开始 Jittor 迁移。
 
 ## 项目目标
 
@@ -85,6 +85,17 @@ python pytorch_pconv_sdm/tools/sanity_check.py
 python pytorch_pconv_sdm/tools/smoke_train.py --max-iters 2 --config mshnet_pconv_sdm
 ```
 
+云端 PyTorch 轻量验证已在 AutoDL RTX 3090 环境通过：
+
+```text
+Python 3.10.8
+PyTorch 2.1.2+cu118
+CUDA 11.8
+GPU: NVIDIA GeForce RTX 3090
+```
+
+已通过的云端检查包括 `check_env.py`、`py_compile`、`sanity_check.py`，以及四组消融配置的 2-iteration smoke train。
+
 训练入口示例：
 
 ```bash
@@ -138,7 +149,7 @@ outputs/
 - [x] 引入 PConv / SD Loss 参考代码
 - [x] 引入 MSHNet 参考代码
 - [x] 完成 PyTorch 组合版
-- [ ] 完成 PyTorch 轻量验证
+- [x] 完成 PyTorch 轻量验证
 - [ ] 完成 Jittor 迁移
 - [ ] 完成 Jittor 轻量验证
 - [ ] 完成四组正式消融实验
