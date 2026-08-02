@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environments
+.env
+.venv/
+venv/
+env/
+
+# IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Data, weights, and experiment outputs
+data/
+datasets/
+weights/
+weight/
+checkpoints/
+runs/
+logs/
+outputs/
+work_dirs/
+*.pth
+*.pt
+*.pkl
+*.onnx
+
+# Reference repositories may contain bundled data or weights.
+code/**/data/
+code/**/datasets/
+code/**/weight/
+code/**/weights/
+code/**/checkpoints/
+code/**/runs/
+code/**/logs/
+code/**/outputs/
+code/**/work_dirs/
