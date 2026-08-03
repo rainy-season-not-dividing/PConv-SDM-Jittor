@@ -224,9 +224,9 @@ Fa: 0.00002573
 
 更完整的复现过程说明见 `docs/reproduction_notes.md`。
 
-## 结果证据与归档策略
+## 结果记录与归档策略
 
-本仓库保留适合公开展示和复查的轻量证据：
+本仓库保留适合公开展示和复查的轻量结果：
 
 ```text
 results/irstd1k_reproduction/
@@ -238,7 +238,7 @@ results/irstd1k_reproduction/
   visualizations/*.png
 ```
 
-以下内容不提交到普通 Git 历史中：
+以下内容不提交到 Git 历史中：
 
 ```text
 logs/
@@ -248,7 +248,7 @@ best_weight.pkl
 checkpoint.pkl
 datasets/
 .ipynb_checkpoints/
-云服务器连接信息或凭据
+
 ```
 
 权重、checkpoint、完整日志和完整云端工作区已保存在本地归档，不上传至仓库中。
