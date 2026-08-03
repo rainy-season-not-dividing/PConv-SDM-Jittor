@@ -1,0 +1,14 @@
+PyTorch 50 epoch baseline:
+epoch=45 loss=0.831905 IoU=0.597179 Pd=0.911565 Fa=0.00001693
+
+Jittor 50 epoch main:
+epoch=48 loss=0.797595 IoU=0.621521 Pd=0.911565 Fa=0.00003105
+
+Jittor 50 epoch ablations:
+mshnet_sls: epoch=38 loss=0.799974 IoU=0.603644 Pd=0.840136 Fa=0.00001526
+mshnet_pconv_sls: epoch=38 loss=0.730999 IoU=0.644378 Pd=0.901361 Fa=0.00001488
+mshnet_sdm: epoch=49 loss=0.849914 IoU=0.573503 Pd=0.867347 Fa=0.00001738
+mshnet_pconv_sdm: epoch=48 loss=0.797595 IoU=0.621521 Pd=0.911565 Fa=0.00003105
+
+Jittor 200 epoch main:
+epoch=147 loss=0.780332 IoU=0.652015 Pd=0.928571 Fa=0.00002573

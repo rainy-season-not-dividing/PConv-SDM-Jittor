@@ -66,10 +66,45 @@ test.exit: 0
 epoch=1 loss=0.871432 IoU=0.141926 Pd=0.527211 Fa=0.00052153
 ```
 
-云端 conda 环境中的 `libstdc++.so.6` 缺少 `GLIBCXX_3.4.30`，运行 Jittor 命令时需要临时加入：
+随后完成了官方 IRSTD-1K 上的 Jittor 50 epoch 对齐、四组 50 epoch 消融，以及 `mshnet_pconv_sdm` 200 epoch 主配置长训练。
+
+主配置结果：
+
+```text
+50 epoch:
+best epoch 48
+IoU=0.621521
+Pd=0.911565
+Fa=0.00003105
+
+200 epoch:
+best epoch 147
+IoU=0.652015
+Pd=0.928571
+Fa=0.00002573
+```
+
+50 epoch 消融结果：
+
+| 配置 | PConv | Loss | best epoch | IoU | Pd | Fa |
+| --- | --- | --- | ---: | ---: | ---: | ---: |
+| `mshnet_sls` | 否 | SLS | 38 | 0.603644 | 0.840136 | 0.00001526 |
+| `mshnet_pconv_sls` | 是 | SLS | 38 | 0.644378 | 0.901361 | 0.00001488 |
+| `mshnet_sdm` | 否 | SDM | 49 | 0.573503 | 0.867347 | 0.00001738 |
+| `mshnet_pconv_sdm` | 是 | SDM | 48 | 0.621521 | 0.911565 | 0.00003105 |
+
+结果表、训练曲线和预测可视化见：
+
+```text
+results/irstd1k_reproduction/
+```
+
+## 云端环境注意事项
+
+AutoDL 云端 conda 环境中的 `libstdc++.so.6` 缺少 `GLIBCXX_3.4.30` 时，运行 Jittor 命令前需要临时加入：
 
 ```bash
 export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6
 ```
 
-下一步先整理迁移提交范围，再准备 Jittor 50 epoch 对齐实验；正式长训练、commit 或 push 前仍需先征求确认。
+该设置只解决运行时动态库加载问题，不改变模型、数据或训练配置。完整日志、权重和 checkpoint 不放入 Git 仓库，已单独保存在本地归档。

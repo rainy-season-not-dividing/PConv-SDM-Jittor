@@ -2,7 +2,7 @@
 
 本仓库用于复现论文 **Pinwheel-shaped Convolution and Scale-based Dynamic Loss for Infrared Small Target Detection** 中面向 mask-based segmentation 的核心方法，并将 PyTorch 组合版迁移到 Jittor。
 
-当前仓库已完成 PyTorch baseline：官方 PyTorch 参考代码已整理，`MSHNet + PConv + SDM` 的 PyTorch 组合版已在本地 CPU、云端 RTX 3090 smoke，以及官方 IRSTD-1K 50 epoch 训练/测试上跑通。Jittor 迁移初版代码已补齐，并已在云端完成随机数据轻量验证和官方 IRSTD-1K 2 epoch debug。下一步是整理 Jittor 迁移提交，并准备 Jittor 50 epoch 对齐实验。
+当前仓库已完成 PyTorch baseline、Jittor 迁移、Jittor 50 epoch 对齐、四组 Jittor 50 epoch 消融，以及 `mshnet_pconv_sdm` 200 epoch 主配置长训练。200 epoch Jittor 主结果为 IoU=0.652015、Pd=0.928571、Fa=0.00002573，优于 50 epoch Jittor 主配置。
 
 ## 项目目标
 
@@ -15,12 +15,13 @@
 
 计划完成的四组实验为：
 
+
 | 实验组 | Backbone | 卷积模块 | Loss |
-| --- | --- | --- | --- |
-| 1 | MSHNet | 普通卷积 | SLS |
-| 2 | MSHNet | PConv | SLS |
-| 3 | MSHNet | 普通卷积 | SDM |
-| 4 | MSHNet | PConv | SDM |
+| ------ | -------- | -------- | ---- |
+| 1      | MSHNet   | 普通卷积 | SLS  |
+| 2      | MSHNet   | PConv    | SLS  |
+| 3      | MSHNet   | 普通卷积 | SDM  |
+| 4      | MSHNet   | PConv    | SDM  |
 
 ## 代码结构
 
@@ -57,10 +58,11 @@ PConv-SDM-Jittor/
 
 `code/` 目录只作为上游参考代码保存，后续不直接在其中开发。正式实现会整理到 `pytorch_pconv_sdm/` 和 `jittor_pconv_sdm/`。
 
-| 参考内容 | 来源仓库 | 当前导入版本 |
-| --- | --- | --- |
+
+| 参考内容         | 来源仓库                                     | 当前导入版本                               |
+| ---------------- | -------------------------------------------- | ------------------------------------------ |
 | PConv 与 SD Loss | https://github.com/JN-Yang/PConv-SDloss-Data | `a801f043c83f73aa9af9ab2f689e59ebef928fc4` |
-| MSHNet backbone | https://github.com/Lliu666/MSHNet | `7c5194b8caeb3329ba8a67c75a6928d4dbeb3582` |
+| MSHNet backbone  | https://github.com/Lliu666/MSHNet            | `7c5194b8caeb3329ba8a67c75a6928d4dbeb3582` |
 
 需要注意的是，PConv 官方仓库主要提供 PConv 与 SD loss 的参考实现，并不等价于完整的 `MSHNet + PConv + SDM` 分割复现工程。因此本项目会先构建一个干净的 PyTorch 组合版，作为 Jittor 迁移前的对齐基准。
 
@@ -74,7 +76,8 @@ PConv-SDM-Jittor/
 6. 在云端 GPU 上完成 Jittor 轻量 smoke test。
 7. 在官方 IRSTD-1K 上完成 Jittor 2 epoch debug。
 8. 运行 Jittor 50 epoch 对齐实验。
-9. 运行 IRSTD-1K 四组正式消融，并整理 IoU、Pd、Fa 与可视化结果。
+9. 运行 IRSTD-1K 四组 50 epoch 消融，并整理 IoU、Pd、Fa 与可视化结果。
+10. 对 `mshnet_pconv_sdm` 追加 200 epoch 长训练，检查主配置是否继续提升。
 
 ## PyTorch 轻量检查
 
@@ -183,16 +186,84 @@ Fa: 0.00052153
 /root/autodl-tmp/PConv-SDM-Jittor/logs/2026-08-02_07_jittor_irstd1k_debug/
 ```
 
-## 当前状态
+## Jittor 复现结果
 
-- [x] 建立正式仓库目录
-- [x] 引入 PConv / SD Loss 参考代码
-- [x] 引入 MSHNet 参考代码
-- [x] 完成 PyTorch 组合版
-- [x] 完成 PyTorch 轻量验证
-- [x] 完成 PyTorch 50 epoch baseline
-- [x] 完成 Jittor 迁移初版代码
-- [x] 完成 Jittor 轻量验证
-- [x] 完成 Jittor 真实数据 2 epoch debug
-- [ ] 完成 Jittor 50 epoch 对齐实验
-- [ ] 完成四组正式消融实验
+官方 IRSTD-1K 上的 Jittor 主配置 `mshnet_pconv_sdm` 已完成 50 epoch 对齐和 200 epoch 长训练：
+
+```text
+50 epoch main:
+best epoch: 48
+IoU: 0.621521
+Pd: 0.911565
+Fa: 0.00003105
+
+200 epoch main:
+best epoch: 147
+IoU: 0.652015
+Pd: 0.928571
+Fa: 0.00002573
+```
+
+50 epoch 四组消融结果：
+
+
+| 配置               | PConv | Loss | best epoch |      IoU |       Pd |         Fa |
+| ------------------ | ----- | ---- | ---------: | -------: | -------: | ---------: |
+| `mshnet_sls`       | 否    | SLS  |         38 | 0.603644 | 0.840136 | 0.00001526 |
+| `mshnet_pconv_sls` | 是    | SLS  |         38 | 0.644378 | 0.901361 | 0.00001488 |
+| `mshnet_sdm`       | 否    | SDM  |         49 | 0.573503 | 0.867347 | 0.00001738 |
+| `mshnet_pconv_sdm` | 是    | SDM  |         48 | 0.621521 | 0.911565 | 0.00003105 |
+
+精简结果文件与三张预测可视化见 `results/irstd1k_reproduction/`。完整训练日志、run 目录、权重和 checkpoint 不提交到 GitHub，仅保存在本地归档。
+
+训练过程曲线和消融对比图：
+
+![主配置训练/评价曲线](results/irstd1k_reproduction/figures/main_training_curves.png)
+
+![50 epoch 消融指标对比](results/irstd1k_reproduction/figures/ablation_50epoch_metrics.png)
+
+更完整的复现过程说明见 `docs/reproduction_notes.md`。
+
+## 结果证据与归档策略
+
+本仓库保留适合公开展示和复查的轻量证据：
+
+```text
+results/irstd1k_reproduction/
+  README.md
+  ablation_table.csv
+  best_metrics.log
+  metrics/*.csv
+  figures/*.png
+  visualizations/*.png
+```
+
+以下内容不提交到普通 Git 历史中：
+
+```text
+logs/
+runs/
+*.pkl
+best_weight.pkl
+checkpoint.pkl
+datasets/
+.ipynb_checkpoints/
+云服务器连接信息或凭据
+```
+
+权重、checkpoint、完整日志和完整云端工作区已保存在本地归档，不上传至仓库中。
+
+## 复现推进记录
+
+- [X]  建立正式仓库目录
+- [X]  引入 PConv / SD Loss 参考代码
+- [X]  引入 MSHNet 参考代码
+- [X]  完成 PyTorch 组合版
+- [X]  完成 PyTorch 轻量验证
+- [X]  完成 PyTorch 50 epoch baseline
+- [X]  完成 Jittor 迁移初版代码
+- [X]  完成 Jittor 轻量验证
+- [X]  完成 Jittor 真实数据 2 epoch debug
+- [X]  完成 Jittor 50 epoch 对齐实验
+- [X]  完成四组正式消融实验
+- [X]  完成 Jittor 200 epoch 主配置长训练

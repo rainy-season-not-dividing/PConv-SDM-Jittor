@@ -1,0 +1,7 @@
+config,framework,epochs,use_pconv,loss,best_epoch,iou,pd,fa,note
+pytorch_mshnet_pconv_sdm,PyTorch,50,true,SDM,45,0.597179,0.911565,0.00001693,50 epoch PyTorch baseline
+jittor_mshnet_sls,Jittor,50,false,SLS,38,0.603644,0.840136,0.00001526,50 epoch ablation
+jittor_mshnet_pconv_sls,Jittor,50,true,SLS,38,0.644378,0.901361,0.00001488,best IoU among 50 epoch ablations
+jittor_mshnet_sdm,Jittor,50,false,SDM,49,0.573503,0.867347,0.00001738,SDM without PConv in this setting
+jittor_mshnet_pconv_sdm,Jittor,50,true,SDM,48,0.621521,0.911565,0.00003105,50 epoch Jittor alignment main run
+jittor_mshnet_pconv_sdm,Jittor,200,true,SDM,147,0.652015,0.928571,0.00002573,200 epoch main run
