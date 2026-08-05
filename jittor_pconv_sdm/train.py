@@ -54,14 +54,38 @@ def build_loss(loss_type):
 
 
 def to_var(x):
+    """
+    将输入转换为 Jittor 的 Var 类型变量。
+    
+    Args:
+        x: 任意输入（可以是 numpy 数组、列表、标量或其他可转换类型）
+    
+    Returns:
+        jt.Var: 转换后的 Jittor 张量变量
+    """
     return x if isinstance(x, jt.Var) else jt.array(x)
 
 
 def train_one_epoch(model, loader, optimizer, criterion, warm_epoch, epoch):
-    model.train()
-    meter = AverageMeter()
-    progress = tqdm(loader, desc=f"Epoch {epoch}")
-    warm_flag = epoch > warm_epoch
+    """
+    执行一个训练周期（epoch）的模型训练。
+
+    Args:
+        model (nn.Module): 待训练的模型，需支持 warm_flag 参数的前向传播
+        loader (DataLoader): 训练数据加载器，每批返回 (images, masks)
+        optimizer (Optimizer): 优化器，用于参数更新
+        criterion (Loss): 基础损失函数（如交叉熵等），用于计算分割损失
+        warm_epoch (int): 预热阶段的 epoch 数，用于决定是否启用预热模式
+        epoch (int): 当前训练轮次（从 1 开始计数）
+
+    Returns:
+        float: 当前 epoch 的平均损失值（所有批次的平均值）
+    """
+    model.train()   # 训练模式
+    meter = AverageMeter()  # 初始化损失均值记录器
+    progress = tqdm(loader, desc=f"Epoch {epoch}")   # 迭代器，一个Batch
+    warm_flag = epoch > warm_epoch  # 是否启用warm 模式
+
 
     for images, masks in progress:
         images = to_var(images).float32()
@@ -69,18 +93,18 @@ def train_one_epoch(model, loader, optimizer, criterion, warm_epoch, epoch):
         outputs, pred = model(images, warm_flag=warm_flag)
         loss = compute_deep_supervision_loss(outputs, pred, masks, criterion, warm_epoch, epoch)
 
-        optimizer.step(loss)
+        optimizer.step(loss)    # 梯度更新
         batch_size = images.shape[0]
         meter.update(float(loss.item()), batch_size)
-        progress.set_postfix(loss=f"{meter.avg:.4f}")
+        progress.set_postfix(loss=f"{meter.avg:.4f}")   # 在进度条右侧显示当前平均损失
 
     return meter.avg
 
 
 def evaluate(model, loader, image_size):
-    model.eval()
-    miou = MeanIoU()
-    pdfa = PDFA(image_size=image_size)
+    model.eval()    # 评估模式
+    miou = MeanIoU()    # 平均IOU损失
+    pdfa = PDFA(image_size=image_size)  # Pd、Fa
     for images, masks in tqdm(loader, desc="Eval"):
         images = to_var(images).float32()
         masks = to_var(masks).float32()
@@ -96,6 +120,7 @@ def main():
     jt.flags.use_cuda = 1 if args.device == "cuda" else 0
     ablation = load_ablation(args.config_file, args.config)
 
+    # 加载数据集
     train_set = IRSTDDataset(
         args.dataset_dir,
         mode="train",
@@ -106,6 +131,7 @@ def main():
         drop_last=True,
         num_workers=args.num_workers,
     )
+    # 加载验证集
     val_set = IRSTDDataset(
         args.dataset_dir,
         mode="val",
@@ -116,9 +142,11 @@ def main():
         drop_last=False,
         num_workers=args.num_workers,
     )
-
+    # 初始化模型
     model = MSHNet(input_channels=3, use_pconv=ablation["use_pconv"])
+    # 损失函数
     criterion = build_loss(ablation["loss_type"])
+    # 优化器，自适应优化
     optimizer = Adagrad(model.parameters(), lr=args.lr)
 
     run_dir = osp.join(args.save_dir, f"{args.config}-{time.strftime('%Y%m%d-%H%M%S')}")
@@ -126,8 +154,11 @@ def main():
     best_iou = 0.0
 
     for epoch in range(args.epochs):
+        # 训练
         train_loss = train_one_epoch(model, train_set, optimizer, criterion, args.warm_epoch, epoch)
+        # 验证
         metrics = evaluate(model, val_set, args.base_size)
+        # 记录每轮训练的指标，持久化到文件
         line = (
             f"epoch={epoch} loss={train_loss:.6f} "
             f"IoU={metrics['IoU']:.6f} Pd={metrics['Pd']:.6f} Fa={metrics['Fa']:.8f}"
@@ -136,10 +167,11 @@ def main():
         with open(osp.join(run_dir, "metrics.log"), "a", encoding="utf-8") as f:
             f.write(line + "\n")
 
+        # 保存最佳权重
         if metrics["IoU"] > best_iou:
             best_iou = metrics["IoU"]
             jt.save(model.state_dict(), osp.join(run_dir, "best_weight.pkl"))
-
+        # 保存训练过程的每轮参数
         jt.save(
             {"net": model.state_dict(), "optimizer": optimizer.state_dict(), "epoch": epoch, "iou": best_iou},
             osp.join(run_dir, "checkpoint.pkl"),

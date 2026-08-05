@@ -43,7 +43,7 @@ def main():
     args = parse_args()
     jt.flags.use_cuda = 1 if args.device == "cuda" else 0
     ablation = load_ablation(args.config_file, args.config)
-
+    # 加载测试数据集
     dataset = IRSTDDataset(
         args.dataset_dir,
         mode="test",
@@ -53,11 +53,12 @@ def main():
         shuffle=False,
         drop_last=False,
     )
-    model = MSHNet(input_channels=3, use_pconv=ablation["use_pconv"])
-    state = jt.load(args.weight_path)
-    model.load_state_dict(state.get("state_dict", state.get("net", state)))
-    model.eval()
+    model = MSHNet(input_channels=3, use_pconv=ablation["use_pconv"])   # 模型
+    state = jt.load(args.weight_path)   # 权重参数
+    model.load_state_dict(state.get("state_dict", state.get("net", state))) # 加载权重
+    model.eval()    # 评估模式
 
+    # 评估指标
     miou = MeanIoU()
     pdfa = PDFA(image_size=args.base_size)
     for images, masks in tqdm(dataset, desc="Test"):
